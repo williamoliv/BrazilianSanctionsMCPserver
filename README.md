@@ -1,6 +1,6 @@
 # Brazilian Sanctions MCP Server
 
-An MCP (Model Context Protocol) server that provides access to Brazilian sanctions databases through the Porta da Transparência API, along with an AI-powered chatbot interface for natural language queries.
+An MCP (Model Context Protocol) server that provides access to Brazilian sanctions databases through the Porta da Transparência API.
 
 ## Components
 
@@ -10,7 +10,7 @@ An MCP (Model Context Protocol) server that provides access to Brazilian sanctio
 ## Features
 
 - Search across 5 Brazilian sanctions registers
-- Natural language interface via AI chatbot
+- A simple Natural language interface via AI chatbot (only for tests)
 - Search by CNPJ, CPF, or company name
 - Detailed sanction information including reasons, dates, and agencies
 - Secure API key authentication

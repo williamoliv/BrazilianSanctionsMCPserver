@@ -37,10 +37,10 @@ BrazilianSanctionsData = {
     }
 }
 
-# Load environment variables
+# Load Portal Tranasparecia API key
 load_dotenv()
 
-# Initialize the FastMCP server
+# Initialize
 mcp = FastMCP("BrazillianSanctions")
 
 """
@@ -81,7 +81,7 @@ class BrazilianSanctionsAPI:
     
     BASE_URL = "https://api.portaldatransparencia.gov.br/api-de-dados"
     
-    # Timeout for API requests
+    # Timeout for API requests, 20 seconds for productive enviroments
     TIMEOUT = 10
     
     def __init__(self, api_key: Optional[str] = None):
@@ -97,7 +97,7 @@ class BrazilianSanctionsAPI:
         """
         import os
         
-        # Try to get API key from parameter, environment variable, or config file
+        # Try to get API key from parameter, environment variable, or config file.
         self.api_key = api_key or os.getenv("PORTAL_TRANSPARENCIA_API_KEY")
         
         if not self.api_key:
@@ -177,7 +177,7 @@ class BrazilianSanctionsAPI:
                 error=f"Request failed: {str(e)}"
             )
     
-    # ==================== CNEP Methods ====================
+    # ==================== CNEP Methods ==================== #
     
     def search_cnep(
         self,
@@ -226,7 +226,7 @@ class BrazilianSanctionsAPI:
         """
         return self._make_request(f"/cnep/{record_id}")
     
-    # ==================== CEPIM Methods ====================
+    # ==================== CEPIM Methods ==================== #
     
     def search_cepim(
         self,
@@ -316,7 +316,7 @@ class BrazilianSanctionsAPI:
         """
         return self._make_request(f"/ceis/{record_id}")
     
-    # ==================== CEAF Methods ====================
+    # ==================== CEAF Methods ==================== # 
     
     def search_ceaf(
         self,
@@ -361,7 +361,7 @@ class BrazilianSanctionsAPI:
         """
         return self._make_request(f"/ceaf/{record_id}")
     
-    # ==================== Acordos de Leniência Methods ====================
+    # ==================== Acordos de Leniência Methods ==================== #
     
     def search_acordos_leniencia(
         self,
@@ -410,7 +410,7 @@ class BrazilianSanctionsAPI:
         """
         return self._make_request(f"/acordos-leniencia/{record_id}")
     
-    # ==================== Utility Methods ====================
+    # ==================== Utility Methods ==================== #
     
     @staticmethod
     def _clean_document(doc: str) -> str:
@@ -478,59 +478,7 @@ class BrazilianSanctionsAPI:
             print(f"Data:\n{json.dumps(result.data, indent=2, ensure_ascii=False)}")
 
 
-# ==================== Example Usage ====================
-
-def main():
-    """Example usage of the Brazilian Sanctions API client"""
-    
-    # Option 1: Pass API key directly
-    api_key = "sua_chave_api_aqui"
-    try:
-        client = BrazilianSanctionsAPI(api_key=api_key)
-    except ValueError as e:
-        print(f"Error: {e}")
-        return
-    
-    print("Brazilian Sanctions Search Examples")
-    print("="*60)
-    
-    # Example 1: Search CNEP by CNPJ
-    print("\n1. Searching CNEP for a company (CNPJ example)...")
-    result = client.search_cnep(cnpj="00.000.000/0000-00")
-    client.print_results(result, "CNEP Search Results")
-    
-    # Example 2: Search CEIS by CPF
-    print("\n2. Searching CEIS for a person (CPF example)...")
-    result = client.search_ceis(cpf="000.000.000-00")
-    client.print_results(result, "CEIS Search Results")
-    
-    # Example 3: Search all registers for a CNPJ
-    print("\n3. Comprehensive search for CNPJ across all registers...")
-    all_results = client.search_all(cnpj="00.000.000/0000-00")
-    for register_type, result in all_results.items():
-        print(f"\n{register_type.upper()}: {result.total_records} records found")
-        if result.error:
-            print(f"  Error: {result.error}")
-    
-    # Example 4: Search CEAF by CPF with date range
-    print("\n4. Searching CEAF with date range...")
-    result = client.search_ceaf(
-        cpf="000.000.000-00",
-        data_inicio="2022-01-01",
-        data_fim="2023-12-31"
-    )
-    client.print_results(result, "CEAF Search Results (Date Range)")
-    
-    # Example 5: Get specific record by ID
-    print("\n5. Getting specific CNEP record...")
-    result = client.get_cnep_by_id("123456")
-    client.print_results(result, "Specific CNEP Record")
-
-
-if __name__ == "__main__":
-    main()
-
-# ==================== MCP Tools ====================
+# ==================== MCP Tools ==================== # 
 
 # Initialize API client (will be done lazily when needed)
 _api_client = None
