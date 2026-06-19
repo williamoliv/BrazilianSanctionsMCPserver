@@ -998,6 +998,49 @@ async def get_sanction_details(
 
 
 @mcp.tool()
+async def identify_document_type(document: str) -> Dict[str, Any]:
+    """
+    Identifies whether a document is a CPF (individual) or CNPJ (company).
+    This tool helps avoid confusion when working with other AIs by clearly indicating
+    the document type being analyzed.
+    
+    Note: Leading zeros are preserved during cleaning (e.g., "000.000.000-00" is valid CPF).
+    
+    Args:
+        document: CPF or CNPJ string (formatted or unformatted)
+        
+    Returns:
+        Dictionary with document type information
+    """
+    # Clean the document by removing non-digit characters
+    clean_doc = "".join(c for c in document if c.isdigit())
+    
+    # Determine document type based on length
+    if len(clean_doc) == 11:
+        doc_type = "CPF"
+        description = "Cadastro de Pessoa Física (Individual Tax ID)"
+        entity_type = "Individual Person"
+    elif len(clean_doc) == 14:
+        doc_type = "CNPJ"
+        description = "Cadastro Nacional da Pessoa Jurídica (Company Tax ID)"
+        entity_type = "Legal Entity/Company"
+    else:
+        doc_type = "UNKNOWN"
+        description = "Invalid document length"
+        entity_type = "Unknown"
+    
+    return {
+        "original_document": document,
+        "cleaned_document": clean_doc,
+        "document_type": doc_type,
+        "description": description,
+        "entity_type": entity_type,
+        "digit_count": len(clean_doc),
+        "is_valid_format": doc_type in ["CPF", "CNPJ"]
+    }
+
+
+@mcp.tool()
 async def check_sanction_status(
     cnpj: Optional[str] = None,
     cpf: Optional[str] = None
