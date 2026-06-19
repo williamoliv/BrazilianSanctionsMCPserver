@@ -21,7 +21,7 @@ async def main():
     
     # Get tools from MCP server
     tools = await client.get_tools()
-    
+
     llm = ChatOllama(
         model="qwen3:8b",
         temperature=0

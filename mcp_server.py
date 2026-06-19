@@ -202,15 +202,15 @@ class BrazilianSanctionsAPI:
         """
         params = {}
         if cnpj:
-            params["cnpj"] = self._clean_document(cnpj)
+            params["codigoSancionado"] = self._clean_document(cnpj)
         if cpf:
-            params["cpf"] = self._clean_document(cpf)
+            params["codigoSancionado"] = self._clean_document(cpf)
         if orgao_sancionador:
-            params["orgao_sancionador"] = orgao_sancionador
+            params["orgaoSancionador"] = orgao_sancionador
         if data_inicio:
-            params["data_inicio"] = data_inicio
+            params["dataInicialSancao"] = data_inicio
         if data_fim:
-            params["data_fim"] = data_fim
+            params["dataFinalSancao"] = data_fim
         
         return self._make_request("/cnep", params)
     
@@ -247,11 +247,11 @@ class BrazilianSanctionsAPI:
         """
         params = {}
         if cnpj:
-            params["cnpj"] = self._clean_document(cnpj)
+            params["cnpjSancionado"] = self._clean_document(cnpj)
         if cpf:
-            params["cpf"] = self._clean_document(cpf)
+            params["cnpjSancionado"] = self._clean_document(cpf)
         if orgao_superior:
-            params["orgao_superior"] = orgao_superior
+            params["orgaoEntidade"] = orgao_superior
         
         return self._make_request("/cepim", params)
     
@@ -292,15 +292,15 @@ class BrazilianSanctionsAPI:
         """
         params = {}
         if cnpj:
-            params["cnpj"] = self._clean_document(cnpj)
+            params["codigoSancionado"] = self._clean_document(cnpj)
         if cpf:
-            params["cpf"] = self._clean_document(cpf)
+            params["codigoSancionado"] = self._clean_document(cpf)
         if orgao_sancionador:
-            params["orgao_sancionador"] = orgao_sancionador
+            params["orgaoSancionador"] = orgao_sancionador
         if data_inicio:
-            params["data_inicio"] = data_inicio
+            params["dataInicialSancao"] = data_inicio
         if data_fim:
-            params["data_fim"] = data_fim
+            params["dataFinalSancao"] = data_fim
         
         return self._make_request("/ceis", params)
     
@@ -339,13 +339,13 @@ class BrazilianSanctionsAPI:
         """
         params = {}
         if cpf:
-            params["cpf"] = self._clean_document(cpf)
+            params["cpfSancionado"] = self._clean_document(cpf)
         if orgao_lotacao:
-            params["orgao_lotacao"] = orgao_lotacao
+            params["orgaoLotacao"] = orgao_lotacao
         if data_inicio:
-            params["data_inicio"] = data_inicio
+            params["dataPublicacaoInicio"] = data_inicio
         if data_fim:
-            params["data_fim"] = data_fim
+            params["dataPublicacaoFim"] = data_fim
         
         return self._make_request("/ceaf", params)
     
@@ -386,15 +386,15 @@ class BrazilianSanctionsAPI:
         """
         params = {}
         if nome:
-            params["nome"] = nome
+            params["nomeSancionado"] = nome
         if cnpj:
-            params["cnpj"] = self._clean_document(cnpj)
+            params["cnpjSancionado"] = self._clean_document(cnpj)
         if situacao:
             params["situacao"] = situacao
         if data_inicio:
-            params["data_inicio"] = data_inicio
+            params["dataInicialSancao"] = data_inicio
         if data_fim:
-            params["data_fim"] = data_fim
+            params["dataFinalSancao"] = data_fim
         
         return self._make_request("/acordos-leniencia", params)
     
@@ -491,6 +491,151 @@ def get_api_client():
     return _api_client
 
 
+def extract_fields_from_records(records: List[Dict], register_type: str) -> List[Dict]:
+    """
+    Extract relevant fields from API records based on register type
+    
+    Args:
+        records: List of record dictionaries from API
+        register_type: Type of register (CNEP, CEPIM, CEIS, CEAF, LENIENCY_AGREEMENTS)
+        
+    Returns:
+        List of dictionaries with extracted fields
+    """
+    extracted = []
+    
+    def safe_get(dct, *keys):
+        """Safely get nested dictionary values"""
+        for key in keys:
+            if isinstance(dct, dict) and key in dct:
+                dct = dct[key]
+            else:
+                return None
+        return dct
+    
+    for record in records:
+        extracted_record = {}
+        
+        if register_type == "CNEP":
+            extracted_record = {
+                "nome_sancionado": safe_get(record, "sancionado", "nome"),
+                "razao_social": safe_get(record, "pessoa", "razaoSocialReceita"),
+                "nome_fantasia": safe_get(record, "pessoa", "nomeFantasiaReceita"),
+                "pessoa_nome": safe_get(record, "pessoa", "nome"),
+                "orgao_sancionador": safe_get(record, "orgaoSancionador", "nome"),
+                "orgao_sancionador_sigla": safe_get(record, "orgaoSancionador", "siglaUf"),
+                "orgao_sancionador_poder": safe_get(record, "orgaoSancionador", "poder"),
+                "orgao_sancionador_esfera": safe_get(record, "orgaoSancionador", "esfera"),
+                "data_inicial_sancao": record.get("dataInicioSancao"),
+                "data_final_sancao": record.get("dataFimSancao"),
+                "data_publicacao_sancao": record.get("dataPublicacaoSancao"),
+                "tipo_sancao_descricao": safe_get(record, "tipoSancao", "descricaoResumida"),
+                "tipo_sancao_portal": safe_get(record, "tipoSancao", "descricaoPortal"),
+                "fundamentacao": record.get("fundamentacao"),
+                "valor_multa": record.get("valorMulta"),
+                "numero_processo": record.get("numeroProcesso")
+            }
+        elif register_type == "CEPIM":
+            extracted_record = {
+                "nome_sancionado": safe_get(record, "pessoaJuridica", "nome"),
+                "razao_social": safe_get(record, "pessoaJuridica", "razaoSocialReceita"),
+                "nome_fantasia": safe_get(record, "pessoaJuridica", "nomeFantasiaReceita"),
+                "orgao_superior": safe_get(record, "orgaoSuperior", "nome"),
+                "orgao_superior_sigla": safe_get(record, "orgaoSuperior", "sigla"),
+                "orgao_superior_poder": safe_get(record, "orgaoSuperior", "descricaoPoder"),
+                "motivo": record.get("motivo"),
+                "convenio_objeto": safe_get(record, "convenio", "objeto"),
+                "convenio_numero": safe_get(record, "convenio", "numero")
+            }
+        elif register_type == "CEIS":
+            extracted_record = {
+                "nome_sancionado": safe_get(record, "sancionado", "nome"),
+                "razao_social": safe_get(record, "pessoa", "razaoSocialReceita"),
+                "nome_fantasia": safe_get(record, "pessoa", "nomeFantasiaReceita"),
+                "pessoa_nome": safe_get(record, "pessoa", "nome"),
+                "orgao_sancionador": safe_get(record, "orgaoSancionador", "nome"),
+                "orgao_sancionador_sigla": safe_get(record, "orgaoSancionador", "siglaUf"),
+                "orgao_sancionador_poder": safe_get(record, "orgaoSancionador", "poder"),
+                "orgao_sancionador_esfera": safe_get(record, "orgaoSancionador", "esfera"),
+                "data_inicial_sancao": record.get("dataInicioSancao"),
+                "data_final_sancao": record.get("dataFimSancao"),
+                "data_publicacao_sancao": record.get("dataPublicacaoSancao"),
+                "tipo_sancao_descricao": safe_get(record, "tipoSancao", "descricaoResumida"),
+                "tipo_sancao_portal": safe_get(record, "tipoSancao", "descricaoPortal"),
+                "fundamentacao": record.get("fundamentacao"),
+                "numero_processo": record.get("numeroProcesso")
+            }
+        elif register_type == "CEAF":
+            extracted_record = {
+                "nome_sancionado": safe_get(record, "punicao", "nomePunido"),
+                "razao_social": safe_get(record, "pessoa", "razaoSocialReceita"),
+                "nome_fantasia": safe_get(record, "pessoa", "nomeFantasiaReceita"),
+                "pessoa_nome": safe_get(record, "pessoa", "nome"),
+                "orgao_lotacao": safe_get(record, "orgaoLotacao", "nome"),
+                "orgao_lotacao_sigla": safe_get(record, "orgaoLotacao", "sigla"),
+                "orgao_lotacao_pasta": safe_get(record, "orgaoLotacao", "siglaDaPasta"),
+                "uf_lotacao": safe_get(record, "ufLotacaoPessoa", "uf", "sigla"),
+                "uf_lotacao_nome": safe_get(record, "ufLotacaoPessoa", "uf", "nome"),
+                "data_publicacao": record.get("dataPublicacao"),
+                "data_referencia": record.get("dataReferencia"),
+                "tipo_punicao_descricao": safe_get(record, "tipoPunicao", "descricao"),
+                "cargo_efetivo": record.get("cargoEfetivo"),
+                "cargo_comissao": record.get("cargoComissao"),
+                "fundamentacao": record.get("fundamentacao")
+            }
+        elif register_type == "LENIENCY_AGREEMENTS":
+            # Extract names from sancoes array
+            sancoes = record.get("sancoes", [])
+            if sancoes and isinstance(sancoes, list):
+                first_sancoes = sancoes[0] if isinstance(sancoes[0], dict) else {}
+                extracted_record = {
+                    "nome_sancionado": first_sancoes.get("nomeInformadoOrgaoResponsavel"),
+                    "razao_social": first_sancoes.get("razaoSocial"),
+                    "nome_fantasia": first_sancoes.get("nomeFantasia"),
+                    "cnpj": first_sancoes.get("cnpjFormatado"),
+                    "orgao_responsavel": record.get("orgaoResponsavel"),
+                    "situacao_acordo": record.get("situacaoAcordo"),
+                    "data_inicio_acordo": record.get("dataInicioAcordo"),
+                    "data_fim_acordo": record.get("dataFimAcordo"),
+                    "quantidade": record.get("quantidade")
+                }
+            else:
+                extracted_record = {
+                    "orgao_responsavel": record.get("orgaoResponsavel"),
+                    "situacao_acordo": record.get("situacaoAcordo"),
+                    "data_inicio_acordo": record.get("dataInicioAcordo"),
+                    "data_fim_acordo": record.get("dataFimAcordo"),
+                    "quantidade": record.get("quantidade")
+                }
+        
+        # Add raw record for reference
+        extracted_record["_raw"] = record
+        extracted.append(extracted_record)
+    
+    return extracted
+
+
+def is_still_sanctioned(data_final_sancao: Optional[str]) -> bool:
+    """
+    Check if sanction is still active based on end date
+    
+    Args:
+        data_final_sancao: End date string (YYYY-MM-DD format)
+        
+    Returns:
+        True if sanction is still active, False otherwise
+    """
+    if not data_final_sancao:
+        return True  # No end date means still active
+    
+    try:
+        from datetime import datetime
+        end_date = datetime.strptime(data_final_sancao, "%Y-%m-%d")
+        return end_date >= datetime.now()
+    except (ValueError, TypeError):
+        return True  # If date parsing fails, assume still active
+
+
 @mcp.tool()
 async def search_cnep(
     cnpj: Optional[str] = None,
@@ -510,7 +655,7 @@ async def search_cnep(
         data_fim: End date (YYYY-MM-DD)
         
     Returns:
-        Dictionary with CNEP search results
+        Dictionary with CNEP search results including extracted fields
     """
     client = get_api_client()
     result = client.search_cnep(
@@ -520,11 +665,17 @@ async def search_cnep(
         data_inicio=data_inicio,
         data_fim=data_fim
     )
+    
+    # Extract relevant fields from records
+    records = result.data.get("registros", []) if isinstance(result.data, dict) else (result.data if isinstance(result.data, list) else [])
+    extracted_records = extract_fields_from_records(records, "CNEP")
+    
     return {
         "status_code": result.status_code,
         "total_records": result.total_records,
         "error": result.error,
-        "data": result.data
+        "data": result.data,
+        "extracted_fields": extracted_records
     }
 
 
@@ -543,7 +694,7 @@ async def search_cepim(
         orgao_superior: Superior agency
         
     Returns:
-        Dictionary with CEPIM search results
+        Dictionary with CEPIM search results including extracted fields
     """
     client = get_api_client()
     result = client.search_cepim(
@@ -551,11 +702,17 @@ async def search_cepim(
         cpf=cpf,
         orgao_superior=orgao_superior
     )
+    
+    # Extract relevant fields from records
+    records = result.data.get("registros", []) if isinstance(result.data, dict) else (result.data if isinstance(result.data, list) else [])
+    extracted_records = extract_fields_from_records(records, "CEPIM")
+    
     return {
         "status_code": result.status_code,
         "total_records": result.total_records,
         "error": result.error,
-        "data": result.data
+        "data": result.data,
+        "extracted_fields": extracted_records
     }
 
 
@@ -578,7 +735,7 @@ async def search_ceis(
         data_fim: End date (YYYY-MM-DD)
         
     Returns:
-        Dictionary with CEIS search results
+        Dictionary with CEIS search results including extracted fields
     """
     client = get_api_client()
     result = client.search_ceis(
@@ -588,11 +745,17 @@ async def search_ceis(
         data_inicio=data_inicio,
         data_fim=data_fim
     )
+    
+    # Extract relevant fields from records
+    records = result.data.get("registros", []) if isinstance(result.data, dict) else (result.data if isinstance(result.data, list) else [])
+    extracted_records = extract_fields_from_records(records, "CEIS")
+    
     return {
         "status_code": result.status_code,
         "total_records": result.total_records,
         "error": result.error,
-        "data": result.data
+        "data": result.data,
+        "extracted_fields": extracted_records
     }
 
 
@@ -613,7 +776,7 @@ async def search_ceaf(
         data_fim: End date (YYYY-MM-DD)
         
     Returns:
-        Dictionary with CEAF search results
+        Dictionary with CEAF search results including extracted fields
     """
     client = get_api_client()
     result = client.search_ceaf(
@@ -622,11 +785,17 @@ async def search_ceaf(
         data_inicio=data_inicio,
         data_fim=data_fim
     )
+    
+    # Extract relevant fields from records
+    records = result.data.get("registros", []) if isinstance(result.data, dict) else (result.data if isinstance(result.data, list) else [])
+    extracted_records = extract_fields_from_records(records, "CEAF")
+    
     return {
         "status_code": result.status_code,
         "total_records": result.total_records,
         "error": result.error,
-        "data": result.data
+        "data": result.data,
+        "extracted_fields": extracted_records
     }
 
 
@@ -649,7 +818,7 @@ async def search_acordos_leniencia(
         data_fim: End date (YYYY-MM-DD)
         
     Returns:
-        Dictionary with leniency agreement search results
+        Dictionary with leniency agreement search results including extracted fields
     """
     client = get_api_client()
     result = client.search_acordos_leniencia(
@@ -659,11 +828,17 @@ async def search_acordos_leniencia(
         data_inicio=data_inicio,
         data_fim=data_fim
     )
+    
+    # Extract relevant fields from records
+    records = result.data.get("registros", []) if isinstance(result.data, dict) else (result.data if isinstance(result.data, list) else [])
+    extracted_records = extract_fields_from_records(records, "LENIENCY_AGREEMENTS")
+    
     return {
         "status_code": result.status_code,
         "total_records": result.total_records,
         "error": result.error,
-        "data": result.data
+        "data": result.data,
+        "extracted_fields": extracted_records
     }
 
 
@@ -820,6 +995,361 @@ async def get_sanction_details(
         return f"Sanction '{sanction_type}' not found. Available types: {', '.join(BrazilianSanctionsData.keys())}"
     
     return f"{sanction['full_name']}: {sanction['description']}"
+
+
+@mcp.tool()
+async def check_sanction_status(
+    cnpj: Optional[str] = None,
+    cpf: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Check if an entity is still sanctioned across all registers based on end dates
+    
+    Args:
+        cnpj: Company CNPJ (with or without formatting)
+        cpf: Person CPF (with or without formatting)
+        
+    Returns:
+        Dictionary with sanction status for each register indicating if still active
+    """
+    client = get_api_client()
+    results = client.search_all(cnpj=cnpj, cpf=cpf)
+    
+    status_summary = {
+        "document": cnpj or cpf,
+        "checked_at": datetime.now().isoformat(),
+        "registers": {}
+    }
+    
+    for register_name, result in results.items():
+        if result.total_records == 0:
+            status_summary["registers"][register_name] = {
+                "found": False,
+                "still_sanctioned": False,
+                "records": []
+            }
+            continue
+        
+        records = result.data.get("registros", []) if isinstance(result.data, dict) else (result.data if isinstance(result.data, list) else [])
+        register_type = register_name.replace("_cpf", "").upper()
+        
+        # Determine which register type to use for extraction
+        if "CNEP" in register_name:
+            extract_type = "CNEP"
+        elif "CEPIM" in register_name:
+            extract_type = "CEPIM"
+        elif "CEIS" in register_name:
+            extract_type = "CEIS"
+        elif "CEAF" in register_name:
+            extract_type = "CEAF"
+        elif "LENIENT" in register_name:
+            extract_type = "LENIENCY_AGREEMENTS"
+        else:
+            extract_type = register_name
+        
+        extracted = extract_fields_from_records(records, extract_type)
+        
+        # Check each record for active sanctions
+        record_statuses = []
+        any_active = False
+        
+        for record in extracted:
+            data_final = record.get("data_final_sancao") or record.get("data_fim_acordo")
+            is_active = is_still_sanctioned(data_final)
+            
+            if is_active:
+                any_active = True
+            
+            record_statuses.append({
+                "nome_sancionado": record.get("nome_sancionado"),
+                "data_final_sancao": data_final,
+                "still_sanctioned": is_active
+            })
+        
+        status_summary["registers"][register_name] = {
+            "found": True,
+            "still_sanctioned": any_active,
+            "total_records": len(record_statuses),
+            "records": record_statuses
+        }
+    
+    # Overall status
+    all_active = any(r.get("still_sanctioned", False) for r in status_summary["registers"].values())
+    status_summary["overall_still_sanctioned"] = all_active
+    
+    return status_summary
+
+
+@mcp.tool()
+async def get_sanctioning_authorities(
+    cnpj: Optional[str] = None,
+    cpf: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Get information about who sanctioned the entity (orgaoSancionador)
+    
+    Args:
+        cnpj: Company CNPJ (with or without formatting)
+        cpf: Person CPF (with or without formatting)
+        
+    Returns:
+        Dictionary with sanctioning authorities for each register
+    """
+    client = get_api_client()
+    results = client.search_all(cnpj=cnpj, cpf=cpf)
+    
+    authorities_summary = {
+        "document": cnpj or cpf,
+        "checked_at": datetime.now().isoformat(),
+        "registers": {}
+    }
+    
+    for register_name, result in results.items():
+        if result.total_records == 0:
+            authorities_summary["registers"][register_name] = {
+                "found": False,
+                "authorities": []
+            }
+            continue
+        
+        records = result.data.get("registros", []) if isinstance(result.data, dict) else (result.data if isinstance(result.data, list) else [])
+        
+        # Determine which register type to use for extraction
+        if "CNEP" in register_name:
+            extract_type = "CNEP"
+        elif "CEPIM" in register_name:
+            extract_type = "CEPIM"
+        elif "CEIS" in register_name:
+            extract_type = "CEIS"
+        elif "CEAF" in register_name:
+            extract_type = "CEAF"
+        elif "LENIENT" in register_name:
+            extract_type = "LENIENCY_AGREEMENTS"
+        else:
+            extract_type = register_name
+        
+        extracted = extract_fields_from_records(records, extract_type)
+        
+        # Extract sanctioning authorities
+        authorities = []
+        for record in extracted:
+            authority = (record.get("orgao_sancionador") or 
+                        record.get("orgao_superior") or 
+                        record.get("orgao_lotacao") or 
+                        record.get("orgao_responsavel"))
+            
+            if authority:
+                authorities.append({
+                    "nome_sancionado": record.get("nome_sancionado") or record.get("razao_social") or record.get("nome_fantasia"),
+                    "authority": authority,
+                    "data_inicial": record.get("data_inicial_sancao") or record.get("data_inicio_acordo"),
+                    "data_final": record.get("data_final_sancao") or record.get("data_fim_acordo")
+                })
+        
+        authorities_summary["registers"][register_name] = {
+            "found": True,
+            "total_authorities": len(authorities),
+            "authorities": authorities
+        }
+    
+    return authorities_summary
+
+
+@mcp.tool()
+async def get_location_info(
+    cnpj: Optional[str] = None,
+    cpf: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Get location/state information (UF, orgaoLotacao) for sanctioned entities
+    
+    Args:
+        cnpj: Company CNPJ (with or without formatting)
+        cpf: Person CPF (with or without formatting)
+        
+    Returns:
+        Dictionary with location information from registers
+    """
+    client = get_api_client()
+    results = client.search_all(cnpj=cnpj, cpf=cpf)
+    
+    location_summary = {
+        "document": cnpj or cpf,
+        "checked_at": datetime.now().isoformat(),
+        "registers": {}
+    }
+    
+    for register_name, result in results.items():
+        if result.total_records == 0:
+            location_summary["registers"][register_name] = {
+                "found": False,
+                "locations": []
+            }
+            continue
+        
+        records = result.data.get("registros", []) if isinstance(result.data, dict) else (result.data if isinstance(result.data, list) else [])
+        
+        # Determine which register type to use for extraction
+        if "CNEP" in register_name:
+            extract_type = "CNEP"
+        elif "CEPIM" in register_name:
+            extract_type = "CEPIM"
+        elif "CEIS" in register_name:
+            extract_type = "CEIS"
+        elif "CEAF" in register_name:
+            extract_type = "CEAF"
+        elif "LENIENT" in register_name:
+            extract_type = "LENIENCY_AGREEMENTS"
+        else:
+            extract_type = register_name
+        
+        extracted = extract_fields_from_records(records, extract_type)
+        
+        # Extract location information
+        locations = []
+        for record in extracted:
+            uf = record.get("uf_sancionado") or record.get("uf_lotacao")
+            orgao = (record.get("orgao_lotacao") or 
+                    record.get("orgao_superior") or 
+                    record.get("orgao_sancionador_sigla"))
+            
+            location_info = {
+                "nome_sancionado": record.get("nome_sancionado") or record.get("razao_social") or record.get("nome_fantasia")
+            }
+            
+            if uf:
+                location_info["uf"] = uf
+            if orgao:
+                location_info["orgao"] = orgao
+            
+            if location_info.get("uf") or location_info.get("orgao"):
+                locations.append(location_info)
+        
+        location_summary["registers"][register_name] = {
+            "found": True,
+            "total_locations": len(locations),
+            "locations": locations
+        }
+    
+    return location_summary
+
+
+@mcp.tool()
+async def get_comprehensive_overview(
+    cnpj: Optional[str] = None,
+    cpf: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Get a comprehensive overview with maximum information from all registers
+    Includes: names, sanctioning authorities, dates, location, status, etc.
+    
+    Args:
+        cnpj: Company CNPJ (with or without formatting)
+        cpf: Person CPF (with or without formatting)
+        
+    Returns:
+        Dictionary with comprehensive information from all registers
+    """
+    client = get_api_client()
+    results = client.search_all(cnpj=cnpj, cpf=cpf)
+    
+    overview = {
+        "document": cnpj or cpf,
+        "document_type": "CNPJ" if cnpj else "CPF",
+        "checked_at": datetime.now().isoformat(),
+        "summary": {
+            "total_registers_checked": len(results),
+            "registers_with_sanctions": 0,
+            "total_sanctions": 0,
+            "still_sanctioned": False
+        },
+        "registers": {}
+    }
+    
+    all_names = set()
+    
+    for register_name, result in results.items():
+        if result.total_records == 0:
+            overview["registers"][register_name] = {
+                "found": False,
+                "sanctions": []
+            }
+            continue
+        
+        overview["summary"]["registers_with_sanctions"] += 1
+        overview["summary"]["total_sanctions"] += result.total_records
+        
+        records = result.data.get("registros", []) if isinstance(result.data, dict) else (result.data if isinstance(result.data, list) else [])
+        
+        # Determine which register type to use for extraction
+        if "CNEP" in register_name:
+            extract_type = "CNEP"
+        elif "CEPIM" in register_name:
+            extract_type = "CEPIM"
+        elif "CEIS" in register_name:
+            extract_type = "CEIS"
+        elif "CEAF" in register_name:
+            extract_type = "CEAF"
+        elif "LENIENT" in register_name:
+            extract_type = "LENIENCY_AGREEMENTS"
+        else:
+            extract_type = register_name
+        
+        extracted = extract_fields_from_records(records, extract_type)
+        
+        # Build comprehensive sanction info
+        sanctions = []
+        register_has_active = False
+        
+        for record in extracted:
+            nome = record.get("nome_sancionado") or record.get("razao_social") or record.get("nome_fantasia")
+            if nome:
+                all_names.add(nome)
+            
+            data_final = record.get("data_final_sancao") or record.get("data_fim_acordo")
+            is_active = is_still_sanctioned(data_final)
+            
+            if is_active:
+                register_has_active = True
+                overview["summary"]["still_sanctioned"] = True
+            
+            sanction_info = {
+                "nome_sancionado": record.get("nome_sancionado"),
+                "razao_social": record.get("razao_social"),
+                "nome_fantasia": record.get("nome_fantasia"),
+                "orgao_sancionador": (record.get("orgao_sancionador") or 
+                                    record.get("orgao_superior") or 
+                                    record.get("orgao_lotacao") or 
+                                    record.get("orgao_responsavel")),
+                "uf": record.get("uf_sancionado") or record.get("uf_lotacao"),
+                "data_inicial_sancao": record.get("data_inicial_sancao") or record.get("data_inicio_acordo"),
+                "data_final_sancao": data_final,
+                "still_sanctioned": is_active,
+                "tipo_sancao_descricao": record.get("tipo_sancao_descricao"),
+                "tipo_punicao_descricao": record.get("tipo_punicao_descricao"),
+                "situacao": record.get("situacao_acordo"),
+                "fundamentacao": record.get("fundamentacao"),
+                "numero_processo": record.get("numero_processo"),
+                "valor_multa": record.get("valor_multa")
+            }
+            
+            # Remove None values
+            sanction_info = {k: v for k, v in sanction_info.items() if v is not None}
+            
+            sanctions.append(sanction_info)
+        
+        overview["registers"][register_name] = {
+            "found": True,
+            "register_type": BrazilianSanctionsData.get(extract_type, {}).get("full_name", extract_type),
+            "total_sanctions": len(sanctions),
+            "has_active_sanctions": register_has_active,
+            "sanctions": sanctions
+        }
+    
+    # Add all unique names found
+    overview["names_found"] = list(all_names)
+    
+    return overview
    
 
 

@@ -10,6 +10,9 @@ An MCP (Model Context Protocol) server that provides access to Brazilian sanctio
 ## Features
 
 - Search across 5 Brazilian sanctions registers
+- Extract specific fields from API responses (names, sanctioning authorities, dates, locations)
+- Check if sanctions are still active based on end dates
+- Get comprehensive overview with maximum information from all registers
 - A simple Natural language interface via AI chatbot (only for tests)
 - Search by CNPJ, CPF, or company name
 - Detailed sanction information including reasons, dates, and agencies
@@ -76,17 +79,25 @@ python main.py
 
 The MCP server exposes the following tools:
 
-### search_cnep
-Search CNEP (National Register of Punishments) for sanctioned entities or individuals by CNPJ or CPF.
+### Search Tools
+- **search_cnep** - Search CNEP (National Register of Punishments) by CNPJ, CPF, agency, or date range
+- **search_cepim** - Search CEPIM (Register of Sanctioned Public Employees) by CNPJ, CPF, or superior agency
+- **search_ceis** - Search CEIS (Register of Ineligible Entities) by CNPJ, CPF, agency, or date range
+- **search_ceaf** - Search CEAF (Ineligibility Register of Public Servants) by CPF, agency, or date range
+- **search_acordos_leniencia** - Search Leniency Agreements by name, CNPJ, status, or date range
+- **search_all_registers** - Search all registers for a given CNPJ or CPF
 
-### search_ceis
-Search CEIS (Register of Ineligible Entities) for sanctioned entities or individuals by CNPJ or CPF.
+### Analysis Tools
+- **check_sanction_status** - Check if an entity is still sanctioned across all registers based on end dates
+- **get_sanctioning_authorities** - Get information about who sanctioned the entity (sanctioning agencies)
+- **get_location_info** - Get location/state information (UF, agency location) for sanctioned entities
+- **get_comprehensive_overview** - Get comprehensive overview with maximum information from all registers including names, authorities, dates, location, and status
 
-### search_all_registers
-Search all sanctions registers (CNEP, CEIS, CEPIM, CEAF, Acordos de Leniência) for a given CNPJ or CPF.
-
-### search_by_name
-Search Leniency Agreements (Acordos de Leniência) by entity name or CNPJ.
+### Utility Tools
+- **get_sanction_details** - Get detailed information about a specific sanction register type
+- **check_entity_sanctions** - Complete sanctions check for an entity across all registers
+- **batch_search** - Search multiple documents (CNPJs or CPFs) in one operation
+- **generate_sanctions_report** - Generate a formatted text report from multiple search results
 
 ## Chatbot Demo
 
