@@ -6,6 +6,7 @@ An MCP (Model Context Protocol) server that provides access to Brazilian sanctio
 
 - **mcp_server.py** - MCP server exposing Brazilian sanctions search tools
 - **main.py** - AI chatbot using LangChain with Ollama for natural language queries
+- **BrazillianSanctions.json** - MCP configuration file
 
 ## Features
 
@@ -23,11 +24,11 @@ An MCP (Model Context Protocol) server that provides access to Brazilian sanctio
 
 | Register | Purpose | Search By |
 |----------|---------|-----------|
-| CNEP | National Register of Punishments | CNPJ, CPF, Agency, Date Range |
-| CEPIM | Register of Sanctioned Public Employees | CNPJ, CPF, Superior Agency |
-| CEIS | Register of Ineligible Entities | CNPJ, CPF, Agency, Date Range |
-| CEAF | Ineligibility Register of Public Servants | CPF, Agency, Date Range |
-| Leniency Agreements | Leniency Agreement Records | Name, CNPJ, Status, Date Range |
+| CNEP | National Register of Punishments | CNPJ, CPF |
+| CEPIM | Register of Sanctioned Public Employees | CNPJ, CPF |
+| CEIS | Register of Ineligible Entities | CNPJ, CPF |
+| CEAF | Ineligibility Register of Public Servants | CPF |
+| Leniency Agreements | Leniency Agreement Records | Name, CNPJ |
 
 **Important**: Name search is only available for Leniency Agreements. The other registers (CNEP, CEIS, CEPIM, CEAF) only support CNPJ/CPF searches due to API limitations.
 
@@ -64,7 +65,7 @@ python mcp_server.py
 
 OR
 
-To use in Claude or Desktop/Code directly use
+To use in Claude/Cursor use
 
 ```bash
 \BrazillianSanctions.json
