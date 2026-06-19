@@ -9,12 +9,12 @@ An MCP (Model Context Protocol) server that provides access to Brazilian sanctio
 
 ## Features
 
-- � Search across 5 Brazilian sanctions registers
-- 🤖 Natural language interface via AI chatbot
-- 📋 Search by CNPJ, CPF, or company name
-- 📊 Detailed sanction information including reasons, dates, and agencies
-- � Secure API key authentication
-- ✅ Async-compatible tool execution
+- Search across 5 Brazilian sanctions registers
+- Natural language interface via AI chatbot
+- Search by CNPJ, CPF, or company name
+- Detailed sanction information including reasons, dates, and agencies
+- Secure API key authentication
+- Async-compatible tool execution
 
 ## Sanctions Registers Supported
 
@@ -26,22 +26,15 @@ An MCP (Model Context Protocol) server that provides access to Brazilian sanctio
 | CEAF | Ineligibility Register of Public Servants | CPF, Agency, Date Range |
 | Leniency Agreements | Leniency Agreement Records | Name, CNPJ, Status, Date Range |
 
-⚠️ **Important**: Name search is only available for Leniency Agreements. The other registers (CNEP, CEIS, CEPIM, CEAF) only support CNPJ/CPF searches due to API limitations.
+**Important**: Name search is only available for Leniency Agreements. The other registers (CNEP, CEIS, CEPIM, CEAF) only support CNPJ/CPF searches due to API limitations.
 
-## Installation
-
-```bash
-# Install dependencies
-pip install requests python-dotenv langchain langchain-ollama langchain-mcp-adapters langchain-core
-```
-
-## 🔑 API Key Configuration
+## API Key Configuration
 
 **An API key is REQUIRED to use this system.**
 
 ### Get your API key:
 
-1. Visit: https://www.portaldatransparencia.gov.br/
+1. Visit: https://www.portaldatransparencia.gov.br/ (Brazilian CPF is required)
 2. Login or create an account
 3. Go to "Minha Conta" → "API Keys" or "Desenvolvedor"
 4. Generate a new API key
@@ -54,7 +47,7 @@ Create `.env` file in project root:
 PORTAL_TRANSPARENCIA_API_KEY=your_key_here
 ```
 
-⚠️ **SECURITY**: Never commit your API key to version control!
+**SECURITY**: Never commit your API key to version control!
 
 ## Usage
 
@@ -95,21 +88,12 @@ Search all sanctions registers (CNEP, CEIS, CEPIM, CEAF, Acordos de Leniência) 
 ### search_by_name
 Search Leniency Agreements (Acordos de Leniência) by entity name or CNPJ.
 
-## Chatbot Configuration
+## Chatbot Demo
 
-The chatbot uses:
+I'm testing with a local chatbot based in Ollama but the MCP as you know can be plugged to any Agentic AI:
 - **LLM**: Ollama with qwen3:8b model
 - **Agent**: LangChain create_agent with tool calling
 - **Tools**: Custom LangChain tools wrapping the sanctions API
-
-To use a different Ollama model, modify the `model` parameter in `main.py`:
-
-```python
-llm = ChatOllama(
-    model="your_model_name",  # Change this
-    temperature=0
-)
-```
 
 ## Architecture
 
@@ -131,12 +115,14 @@ Natural Language Response
 
 ## Document Formatting
 
-The system automatically cleans document numbers. Both formatted and unformatted documents work:
+The system automatically cleans document numbers(Brazilian CPNJ or CPF). Both formatted and unformatted documents work:
 
 ```python
 # These are equivalent:
-"30.477.220/0001-71"
-"30477220000171"
+"12.345.678/0001-00"
+"123456780001000"
+"123.456.789-66"
+"12345678966"
 ```
 
 ## Error Handling
