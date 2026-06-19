@@ -62,7 +62,15 @@ The MCP server can be run standalone or used by MCP clients:
 python mcp_server.py
 ```
 
-### Running the Chatbot
+OR
+
+To use in Claude or Desktop/Code directly use
+
+```bash
+\BrazillianSanctions.json
+```
+
+### Running the Chatbot (The chatbot it's just for test, make sure to setup the MCP server into a real AML Agentic AI enviroment to proper use)
 
 The chatbot provides a natural language interface to query sanctions databases:
 
