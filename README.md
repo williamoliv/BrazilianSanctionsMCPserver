@@ -171,11 +171,5 @@ The system includes comprehensive error handling:
 - **LangChain**: https://python.langchain.com/
 - **Ollama**: https://ollama.ai/
 
-## License
-
-This project is provided as-is for accessing public Brazilian government data.
-
----
-
 **Last Updated**: June 2026
 **API Base URL**: https://api.portaldatransparencia.gov.br/api-de-dados
