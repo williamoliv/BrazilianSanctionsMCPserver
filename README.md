@@ -5,7 +5,6 @@ An MCP (Model Context Protocol) server that provides access to Brazilian sanctio
 ## Components
 
 - **mcp_server.py** - MCP server exposing Brazilian sanctions search tools
-- **main.py** - AI chatbot using LangChain with Ollama for natural language queries
 - **BrazillianSanctions.json** - MCP configuration file
 
 ## Features
@@ -71,14 +70,6 @@ To use in Claude/Cursor use
 \BrazillianSanctions.json
 ```
 
-### Running the Chatbot (The chatbot it's just for test, make sure to setup the MCP server into a real AML Agentic AI enviroment to proper use)
-
-The chatbot provides a natural language interface to query sanctions databases:
-
-```bash
-python main.py
-```
-
 **Example queries:**
 - "Need to know if 30.477.220/0001-71 is sanctioned by Brazil and if yes why?"
 - "Search for Petrobras in leniency agreements"
@@ -108,19 +99,10 @@ The MCP server exposes the following tools:
 - **batch_search** - Search multiple documents (CNPJs or CPFs) in one operation
 - **generate_sanctions_report** - Generate a formatted text report from multiple search results
 
-## Chatbot Demo
-
-I'm testing with a local chatbot based in Ollama but the MCP as you know can be plugged to any Agentic AI:
-- **LLM**: Ollama with qwen3:8b model
-- **Agent**: LangChain create_agent with tool calling
-- **Tools**: Custom LangChain tools wrapping the sanctions API
-
 ## Architecture
 
 ```
 User Query (Natural Language)
-    ↓
-LangChain Agent (Ollama)
     ↓
 Tool Selection & Execution
     ↓
@@ -159,8 +141,6 @@ The system includes comprehensive error handling:
 | Issue | Solution |
 |-------|----------|
 | API key not found | Set PORTAL_TRANSPARENCIA_API_KEY in .env file |
-| Ollama not running | Start Ollama service: `ollama serve` |
-| Model not found | Pull model: `ollama pull qwen3:8b` |
 | Connection timeout | Check internet connection and API status |
 | No records found | Verify CNPJ/CPF format and check if entity exists |
 
@@ -169,7 +149,6 @@ The system includes comprehensive error handling:
 - **API Documentation**: https://api.portaldatransparencia.gov.br/swagger-ui/index.html
 - **Porta da Transparência**: https://www.portaldatransparencia.gov.br/
 - **MCP Protocol**: https://modelcontextprotocol.io/
-- **LangChain**: https://python.langchain.com/
 - **Ollama**: https://ollama.ai/
 
 **Last Updated**: June 2026
